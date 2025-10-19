@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Animated Tower of Hanoi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Solution for {{ n }} Disks</h1>
+    <h3>Total Moves: {{ total_moves }}</h3>
+    <img src="{{ gif_path }}" alt="Tower of Hanoi Animation" class="animation">
+    <br><br>
+    <a href="/" class="button">← Try Another</a>
+</div>
+</body>
+</html>

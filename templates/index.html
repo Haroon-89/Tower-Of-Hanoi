@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tower of Hanoi Solver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Tower of Hanoi Animation</h1>
+    <form method="POST">
+        <label for="disks">Enter number of disks (1–6):</label><br>
+        <input type="number" id="disks" name="disks" min="1" max="6" required>
+        <button type="submit">Generate Animation</button>
+    </form>
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+</div>
+</body>
+</html>
