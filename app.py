@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend to avoid Tkinter issues
 from flask import Flask, render_template, request, url_for
 import matplotlib.pyplot as plt
 import imageio.v2 as imageio
@@ -10,30 +12,36 @@ ANIM_PATH = "static/animation.gif"
 
 # Function to draw the rods
 def draw_tower(rods, move_count, n):
-    plt.figure(figsize=(8, 5))
+    scale = 3  # Increased scale for better visibility of small disks
+    bar_height = 1.0  # Slightly taller bars for clearer separation
+    half_max = (n * scale) / 2
+    spacing = n * scale + 6  # Adjusted spacing for gap with larger scale
+    num_pegs = len(rods)
+    plt.figure(figsize=(14, 7))  # Larger figure for better absolute sizing
     plt.title(f"Tower of Hanoi - Move {move_count}")
     colors = ['red', 'green', 'blue', 'orange', 'purple', 'brown', 'gray']
     
-    max_width = n + 1
     for i, rod_name in enumerate(rods.keys()):
         rod = rods[rod_name]
-        x_center = i * (max_width + 3)
+        x_center = i * spacing
         
         for j, disk in enumerate(rod):
-            disk_width = disk * 2
-            plt.barh(y=j, width=disk_width, height=0.8, 
+            disk_width = disk * scale
+            plt.barh(y=j, width=disk_width, height=bar_height, 
                      left=x_center - disk_width / 2,
                      color=colors[disk % len(colors)], edgecolor='black')
         plt.text(x_center, -1, rod_name, fontsize=14, ha='center')
     
-    plt.xlim(-3, 3 * max_width)
-    plt.ylim(-1, n + 2)
+    min_x = -half_max - 2
+    max_x = (num_pegs - 1) * spacing + half_max + 2
+    plt.xlim(min_x, max_x)
+    plt.ylim(-2, n + 3)  # Extra padding top and bottom
     plt.axis('off')
+    plt.tight_layout()
 
     filename = f"frame_{move_count}.png"
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches='tight', dpi=100)
     plt.close()
-    time.sleep(0.2)
     return filename
 
 
@@ -43,7 +51,7 @@ def tower_of_hanoi(n, source, auxiliary, target, rods, move_count, frames):
         disk = rods[source].pop()
         rods[target].append(disk)
         move_count[0] += 1
-        frame = draw_tower(rods, move_count[0], len(rods['A']) + len(rods['B']) + len(rods['C']))
+        frame = draw_tower(rods, move_count[0], n)
         frames.append(frame)
         return
     
@@ -51,7 +59,7 @@ def tower_of_hanoi(n, source, auxiliary, target, rods, move_count, frames):
     disk = rods[source].pop()
     rods[target].append(disk)
     move_count[0] += 1
-    frame = draw_tower(rods, move_count[0], len(rods['A']) + len(rods['B']) + len(rods['C']))
+    frame = draw_tower(rods, move_count[0], n)
     frames.append(frame)
     tower_of_hanoi(n - 1, auxiliary, source, target, rods, move_count, frames)
 
@@ -74,9 +82,9 @@ def index():
             # Run algorithm and record frames
             tower_of_hanoi(n, 'A', 'B', 'C', rods, move_count, frames)
 
-            # Build animation
+            # Build animation with balanced speed (1 FPS = 1 second per frame)
             images = [imageio.imread(frame) for frame in frames]
-            imageio.mimsave(ANIM_PATH, images, duration=1.5)
+            imageio.mimsave(ANIM_PATH, images, fps=1.0)  # 1 FPS for 1 second per frame—reasonable pace
 
             # Clean up temporary frames
             for frame in frames:
